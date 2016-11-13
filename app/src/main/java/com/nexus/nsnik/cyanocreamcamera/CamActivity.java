@@ -17,8 +17,10 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.ActivityCompat;
+import android.support.v4.app.LoaderManager;
 import android.support.v4.content.AsyncTaskLoader;
 import android.support.v4.content.ContextCompat;
+import android.support.v4.content.Loader;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.Surface;
@@ -42,7 +44,7 @@ import static android.provider.MediaStore.Files.FileColumns.MEDIA_TYPE_IMAGE;
 import static android.provider.MediaStore.Files.FileColumns.MEDIA_TYPE_VIDEO;
 
 
-public class CamActivity extends AppCompatActivity implements View.OnClickListener, SurfaceHolder.Callback {
+public class CamActivity extends AppCompatActivity implements View.OnClickListener, SurfaceHolder.Callback,LoaderManager.LoaderCallbacks {
 
     Camera mCamera;
     FloatingActionButton cam, goToVidCam, goToFrontCamera;
@@ -57,6 +59,7 @@ public class CamActivity extends AppCompatActivity implements View.OnClickListen
     public ArrayList<Bitmap> temp = new ArrayList<>();
     private static final String mFolder = "Gifs";
     ImageView goToList;
+    private static final int mLoaderId = 1535;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -212,6 +215,11 @@ public class CamActivity extends AppCompatActivity implements View.OnClickListen
             } catch (IOException e) {
             }
             mCamera.startPreview();
+            count++;
+            if(count>=3){
+                Log.d(logTag,temp.size()+"");
+                loadfGifs();
+            }
         }
     };
 
@@ -259,12 +267,6 @@ public class CamActivity extends AppCompatActivity implements View.OnClickListen
             case R.id.fabCamera:
                 Log.d(logTag,count+"");
                 mCamera.takePicture(null, null, pictureCallback);
-                count++;
-                if(count>=3){
-                    makeGif();
-                    count=0;
-                    temp.clear();
-                }
                 break;
             case R.id.fabGoToVidCamera:
                 Toast.makeText(this, "Not Ready", Toast.LENGTH_SHORT).show();
@@ -300,36 +302,29 @@ public class CamActivity extends AppCompatActivity implements View.OnClickListen
         }
     }
 
-    private void makeGif() {
-        File folder = Environment.getExternalStoragePublicDirectory(mFolder);
-        if(!folder.exists()){
-            if(!folder.mkdir()){
-
-            }
-        }
-        File f = new File(folder,new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date()));
-        FileOutputStream outStream = null;
-        try {
-            outStream = new FileOutputStream(f);
-            outStream.write(generateGIF());
-            Log.d("GifSaved",folder+"/test.gif");
-            outStream.close();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+    @Override
+    public Loader onCreateLoader(int id, Bundle args) {
+        return new GifLoade(this,temp);
     }
 
-    private byte[] generateGIF() {
-        ArrayList<Bitmap> bitmaps = temp;
-        ByteArrayOutputStream bos = new ByteArrayOutputStream();
-        AnimatedGifEncoder encoder = new AnimatedGifEncoder();
-        encoder.start(bos);
-        for (Bitmap bitmap : bitmaps) {
-            encoder.addFrame(bitmap);
-        }
-        encoder.finish();
-        return bos.toByteArray();
+    @Override
+    public void onLoadFinished(Loader loader, Object data) {
+        count=0;
+        temp.clear();
+        Toast.makeText(this,"Gif Saved",Toast.LENGTH_SHORT).show();
     }
 
+    @Override
+    public void onLoaderReset(Loader loader) {
+
+    }
+
+    private void loadfGifs() {
+        if (getSupportLoaderManager().getLoader(mLoaderId) == null) {
+            getSupportLoaderManager().initLoader(mLoaderId, null, this).forceLoad();
+        } else {
+            getSupportLoaderManager().restartLoader(mLoaderId, null, this).forceLoad();
+        }
+    }
 }
 
