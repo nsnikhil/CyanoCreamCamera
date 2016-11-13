@@ -6,30 +6,29 @@
     android:orientation="vertical">
 
     <FrameLayout
-        android:id="@+id/camera_preview"
+        android:id="@+id/VidCaamera_preview"
         android:layout_width="match_parent"
         android:layout_height="match_parent" />
 
 
-        <android.support.design.widget.FloatingActionButton
-            android:id="@+id/fabCamera"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:src="@drawable/ic_photo_camera_white_48dp"
-            android:layout_alignParentBottom="true"
-            android:layout_centerHorizontal="true"
-            android:layout_margin="16dp"
-            app:fabSize="normal" />
-
     <android.support.design.widget.FloatingActionButton
-        android:id="@+id/fabGoToVidCamera"
+        android:id="@+id/fabVidCamera"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:src="@drawable/ic_videocam_white_48dp"
         android:layout_alignParentBottom="true"
-        android:layout_alignParentRight="true"
+        android:layout_centerHorizontal="true"
+        android:layout_margin="16dp"
+        app:fabSize="normal" />
+
+    <android.support.design.widget.FloatingActionButton
+        android:id="@+id/goToCamera"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:src="@drawable/ic_photo_camera_white_48dp"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentLeft="true"
         android:layout_margin="16dp"
         app:fabSize="mini"/>
-
 
 </RelativeLayout>
