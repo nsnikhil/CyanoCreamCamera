@@ -16,7 +16,6 @@ public class GifLoade extends AsyncTaskLoader{
     public GifLoade(Context context,ArrayList<Bitmap> send) {
         super(context);
         gif = send;
-        Log.d(logTag,gif.size()+"");
     }
 
     @Override

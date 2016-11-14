@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <PreferenceCategory android:title="@string/picturecateogory">
+
+        <ListPreference android:title="@string/resolution"
+            android:key="@string/camResolutionKey"/>
+
+    </PreferenceCategory>
+
+    <PreferenceCategory android:title="@string/videocateogory">
+
+        <ListPreference android:title="@string/resolution"
+            android:key="@string/vidResolutionKey"/>
+
+    </PreferenceCategory>
+
+    <PreferenceCategory android:title="@string/generalcateogory">
+
+        <CheckBoxPreference
+            android:title="@string/savegif"
+            android:id="@+id/prefSaveGif"
+            android:key="@string/savegifkey"/>
+
+    </PreferenceCategory>
+
+</PreferenceScreen>

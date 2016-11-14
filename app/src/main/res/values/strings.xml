@@ -1,4 +1,15 @@
 <resources>
     <string name="app_name">CyanoCream Camera</string>
     <string name="gifurl">gifurl</string>
+
+    <!-- Prefrences Strings-->
+    <string name="savegif">Save Gif</string>
+    <string name="savegifkey">svgkey</string>
+    <string name="picturecateogory">Picture</string>
+    <string name="videocateogory">Video</string>\
+    <string name="generalcateogory">General</string>
+    <string name="resolution">Resolution</string>
+    <string name="vidResolutionKey">vidrkey</string>
+    <string name="camResolutionKey">camrkey</string>
+    <!-- -->
 </resources>

@@ -22,7 +22,6 @@ public class SaveGif {
         File folder = Environment.getExternalStoragePublicDirectory(mFolder);
         if(!folder.exists()){
             if(!folder.mkdir()){
-
             }
         }
         File f = new File(folder,new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date()));

@@ -29,7 +29,9 @@
         </activity>
         <activity android:name=".VcamActivity" />
         <activity android:name=".ListActivity" />
-        <activity android:name=".GifActivity"></activity>
+        <activity android:name=".GifActivity"/>
+        <activity android:name=".Prefrences"
+            android:label="Settings"/>
     </application>
 
 </manifest>

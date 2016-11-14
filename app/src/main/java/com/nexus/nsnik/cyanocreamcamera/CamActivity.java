@@ -1,16 +1,11 @@
 package com.nexus.nsnik.cyanocreamcamera;
 
 import android.Manifest;
-
-import android.app.Activity;
-import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.hardware.Camera;
-import android.media.MediaRecorder;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Environment;
 import android.support.annotation.NonNull;
@@ -18,7 +13,6 @@ import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.LoaderManager;
-import android.support.v4.content.AsyncTaskLoader;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.content.Loader;
 import android.support.v7.app.AppCompatActivity;
@@ -27,11 +21,8 @@ import android.view.Surface;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 import android.view.View;
-import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.Toast;
-
-import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
@@ -39,12 +30,13 @@ import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 import static android.provider.MediaStore.Files.FileColumns.MEDIA_TYPE_IMAGE;
 import static android.provider.MediaStore.Files.FileColumns.MEDIA_TYPE_VIDEO;
 
 
-public class CamActivity extends AppCompatActivity implements View.OnClickListener, SurfaceHolder.Callback,LoaderManager.LoaderCallbacks {
+public class CamActivity extends AppCompatActivity implements View.OnClickListener, SurfaceHolder.Callback, LoaderManager.LoaderCallbacks,AsyncInterface{
 
     Camera mCamera;
     FloatingActionButton cam, goToVidCam, goToFrontCamera;
@@ -55,10 +47,8 @@ public class CamActivity extends AppCompatActivity implements View.OnClickListen
     private static final String logTag = CamActivity.class.getSimpleName();
     int id = 0;
     private static boolean mSwitch = false;
-    public int count = 0;
-    public ArrayList<Bitmap> temp = new ArrayList<>();
-    private static final String mFolder = "Gifs";
-    ImageView goToList;
+    public static ArrayList<Bitmap> temp = new ArrayList<>();
+    ImageView goToList, settings, flash;
     private static final int mLoaderId = 1535;
 
     @Override
@@ -69,15 +59,21 @@ public class CamActivity extends AppCompatActivity implements View.OnClickListen
         checkPermissions();
         initilize(id);
         setParm();
+        setClickListener();
+    }
+
+    private void setClickListener() {
         cam.setOnClickListener(this);
         goToVidCam.setOnClickListener(this);
         goToFrontCamera.setOnClickListener(this);
         goToList.setOnClickListener(this);
+        settings.setOnClickListener(this);
     }
 
     private void setParm() {
         Camera.Parameters params = mCamera.getParameters();
-        params.setFlashMode(Camera.Parameters.FOCUS_MODE_AUTO);
+        params.setFocusMode(Camera.Parameters.FOCUS_MODE_AUTO);
+        mCamera.enableShutterSound(true);
         mCamera.setParameters(params);
     }
 
@@ -91,21 +87,21 @@ public class CamActivity extends AppCompatActivity implements View.OnClickListen
         cam = (FloatingActionButton) findViewById(R.id.fabCamera);
         goToFrontCamera = (FloatingActionButton) findViewById(R.id.fabGoToFrontCamera);
         goToVidCam = (FloatingActionButton) findViewById(R.id.fabGoToVidCamera);
-        goToList = (ImageView)findViewById(R.id.goToList);
+        goToList = (ImageView) findViewById(R.id.goToList);
+        settings = (ImageView) findViewById(R.id.cameraSettings);
+        flash = (ImageView) findViewById(R.id.camerFlashLight);
     }
 
 
     private Camera getCamera(int id) {
         Camera c = null;
-
         try {
-            if(id==Camera.CameraInfo.CAMERA_FACING_FRONT){
+            if (id == Camera.CameraInfo.CAMERA_FACING_FRONT) {
                 c = Camera.open(Camera.CameraInfo.CAMERA_FACING_FRONT);
-            }else {
+            } else {
                 c = Camera.open(Camera.CameraInfo.CAMERA_FACING_BACK);
             }
         } catch (RuntimeException e) {
-            Log.e(logTag, "Camera failed to open: " + e.getLocalizedMessage());
         }
         return c;
     }
@@ -141,7 +137,7 @@ public class CamActivity extends AppCompatActivity implements View.OnClickListen
 
     @Override
     protected void onResume() {
-        if(mCamera==null){
+        if (mCamera == null) {
             mCamera = getCamera(id);
         }
         super.onResume();
@@ -196,56 +192,6 @@ public class CamActivity extends AppCompatActivity implements View.OnClickListen
         }
     }
 
-
-    Camera.PictureCallback pictureCallback = new Camera.PictureCallback() {
-        @Override
-        public void onPictureTaken(byte[] data, Camera camera) {
-            Bitmap bittemp = BitmapFactory.decodeByteArray(data,0,data.length);
-            temp.add(bittemp);
-            Log.d(logTag,"adeedToList");
-            File pictureFile = getOutputMediaFile(MEDIA_TYPE_IMAGE);
-            if (pictureFile == null) {
-                return;
-            }
-            try {
-                FileOutputStream fos = new FileOutputStream(pictureFile);
-                fos.write(data);
-                fos.close();
-            } catch (FileNotFoundException e) {
-            } catch (IOException e) {
-            }
-            mCamera.startPreview();
-            count++;
-            if(count>=3){
-                Log.d(logTag,temp.size()+"");
-                loadfGifs();
-            }
-        }
-    };
-
-
-    private File getOutputMediaFile(int type) {
-        File mediaStorageDir = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES), "MyCameraApp");
-        if (!mediaStorageDir.exists()) {
-            if (!mediaStorageDir.mkdirs()) {
-                Log.d("MyCameraApp", "failed to create directory");
-                return null;
-            }
-        }
-        String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
-        File mediaFile;
-        if (type == MEDIA_TYPE_IMAGE) {
-            mediaFile = new File(mediaStorageDir.getPath() + File.separator + "IMG_" + timeStamp + ".jpg");
-            Toast.makeText(this,mediaStorageDir.getPath() + File.separator + "IMG_" + timeStamp + ".jpg",Toast.LENGTH_SHORT).show();
-        } else if (type == MEDIA_TYPE_VIDEO) {
-            mediaFile = new File(mediaStorageDir.getPath() + File.separator + "VID_" + timeStamp + ".mp4");
-        } else {
-            return null;
-        }
-
-        return mediaFile;
-    }
-
     @Override
     protected void onPause() {
         super.onPause();
@@ -265,53 +211,68 @@ public class CamActivity extends AppCompatActivity implements View.OnClickListen
     public void onClick(View v) {
         switch (v.getId()) {
             case R.id.fabCamera:
-                Log.d(logTag,count+"");
-                mCamera.takePicture(null, null, pictureCallback);
+                SaveAsync save = new SaveAsync();
+                save.asyncInterface = this;
+                save.execute(mCamera);
                 break;
             case R.id.fabGoToVidCamera:
                 Toast.makeText(this, "Not Ready", Toast.LENGTH_SHORT).show();
                 break;
             case R.id.fabGoToFrontCamera:
-                if(!mSwitch){
-                    goToFrontCamera.setImageResource(R.drawable.ic_camera_rear_white_48dp);
-                    releaseCamera();
-                    initilize(Camera.CameraInfo.CAMERA_FACING_FRONT);
-                    try {
-                        mCamera.setPreviewDisplay(mHolder);
-                        mCamera.startPreview();
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
-                    mSwitch = true;
-                }else {
-                    goToFrontCamera.setImageResource(R.drawable.ic_camera_front_white_48dp);
-                    releaseCamera();
-                    initilize(id);
-                    try {
-                        mCamera.setPreviewDisplay(mHolder);
-                        mCamera.startPreview();
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
-                    mSwitch = false;
-                }
+                frontCam();
                 break;
             case R.id.goToList:
-                startActivity(new Intent(CamActivity.this,ListActivity.class));
+                startActivity(new Intent(CamActivity.this, ListActivity.class));
                 break;
+            case R.id.cameraSettings:
+                startActivity(new Intent(CamActivity.this, Prefrences.class));
+                break;
+        }
+    }
+
+    private void frontCam(){
+        if (!mSwitch) {
+            goToFrontCamera.setImageResource(R.drawable.ic_camera_rear_white_48dp);
+            releaseCamera();
+            initilize(Camera.CameraInfo.CAMERA_FACING_FRONT);
+            try {
+                mCamera.setPreviewDisplay(mHolder);
+                mCamera.startPreview();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            mSwitch = true;
+        } else {
+            goToFrontCamera.setImageResource(R.drawable.ic_camera_front_white_48dp);
+            releaseCamera();
+            initilize(id);
+            try {
+                mCamera.setPreviewDisplay(mHolder);
+                mCamera.startPreview();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            mSwitch = false;
         }
     }
 
     @Override
     public Loader onCreateLoader(int id, Bundle args) {
-        return new GifLoade(this,temp);
+        switch (id){
+            case mLoaderId:
+                return new GifLoade(this, temp);
+        }
+        return null;
     }
 
     @Override
     public void onLoadFinished(Loader loader, Object data) {
-        count=0;
-        temp.clear();
-        Toast.makeText(this,"Gif Saved",Toast.LENGTH_SHORT).show();
+        switch (loader.getId()){
+            case mLoaderId:
+                temp.clear();
+                Toast.makeText(this,"Gif Saved",Toast.LENGTH_SHORT).show();
+                break;
+        }
     }
 
     @Override
@@ -319,11 +280,19 @@ public class CamActivity extends AppCompatActivity implements View.OnClickListen
 
     }
 
-    private void loadfGifs() {
-        if (getSupportLoaderManager().getLoader(mLoaderId) == null) {
-            getSupportLoaderManager().initLoader(mLoaderId, null, this).forceLoad();
+    private void startLoader(int id) {
+        if (getSupportLoaderManager().getLoader(id) == null) {
+            getSupportLoaderManager().initLoader(id, null, this).forceLoad();
         } else {
-            getSupportLoaderManager().restartLoader(mLoaderId, null, this).forceLoad();
+            getSupportLoaderManager().restartLoader(id, null, this).forceLoad();
+        }
+    }
+
+    @Override
+    public void sendBitmap(Bitmap b) {
+        temp.add(b);
+        if(temp.size()==3){
+            startLoader(mLoaderId);
         }
     }
 }
