@@ -5,14 +5,44 @@
     android:layout_height="fill_parent"
     android:orientation="vertical">
 
+    <SurfaceView
+        android:layout_width="match_parent"
+        android:id="@+id/vCamSurface"
+        android:layout_height="match_parent" />
+
     <TextView
         android:layout_width="wrap_content"
-        android:text="VIDEO CAMERA"
-        android:fontFamily="sans-serif-condensed"
-        android:textSize="48sp"
-        android:layout_centerInParent="true"
+        android:text="Recording"
+        android:textSize="24sp"
+        android:layout_centerHorizontal="true"
+        android:layout_margin="16dp"
+        android:textColor="@color/colorAccent"
         android:textStyle="bold"
-        android:textColor="@android:color/holo_red_light"
+        android:visibility="gone"
+        android:id="@+id/vCamIndicator"
         android:layout_height="wrap_content" />
+
+    <android.support.design.widget.FloatingActionButton
+        android:layout_width="wrap_content"
+        app:fabSize="normal"
+        android:id="@+id/vCamStart"
+        android:src="@drawable/ic_videocam_white_48dp"
+        android:layout_alignParentBottom="true"
+        android:layout_centerHorizontal="true"
+        android:layout_margin="16dp"
+        android:layout_height="wrap_content" />
+
+
+    <android.support.design.widget.FloatingActionButton
+        android:layout_width="wrap_content"
+        app:fabSize="mini"
+        android:id="@+id/vCamGoToFrontCamera"
+        android:src="@drawable/ic_camera_front_white_48dp"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentLeft="true"
+        app:backgroundTint="@color/colorPrimary"
+        android:layout_margin="16dp"
+        android:layout_height="wrap_content" />
+
 
 </RelativeLayout>

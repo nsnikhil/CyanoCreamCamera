@@ -1,6 +1,8 @@
 <resources>
     <string name="app_name">CyanoCream Camera</string>
     <string name="gifurl">gifurl</string>
+    <string name="drawerOpen">Open</string>
+    <string name="drawerClose">Close</string>
 
     <!-- Prefrences Strings-->
     <string name="savegif">Save Gif</string>
@@ -11,5 +13,8 @@
     <string name="resolution">Resolution</string>
     <string name="vidResolutionKey">vidrkey</string>
     <string name="camResolutionKey">camrkey</string>
+
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
     <!-- -->
 </resources>

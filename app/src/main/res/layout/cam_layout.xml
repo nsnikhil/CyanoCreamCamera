@@ -12,57 +12,45 @@
 
 
     <android.support.design.widget.FloatingActionButton
+        android:id="@+id/fabGoToFrontCamera"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_gravity="center_vertical"
+        android:layout_margin="16dp"
+        android:src="@drawable/ic_camera_front_white_48dp"
+        app:backgroundTint="@color/colorPrimary"
+        app:fabSize="mini" />
+
+    <android.support.design.widget.FloatingActionButton
         android:id="@+id/fabCamera"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
         android:layout_centerHorizontal="true"
         android:layout_margin="16dp"
+        android:gravity="fill_horizontal"
         android:src="@drawable/ic_photo_camera_white_48dp"
         app:fabSize="normal" />
 
-    <android.support.design.widget.FloatingActionButton
-        android:id="@+id/fabGoToVidCamera"
-        android:layout_width="match_parent"
+
+    <TextView
+        android:id="@+id/gifIndicator"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true"
-        android:layout_alignParentRight="true"
+        android:layout_centerHorizontal="true"
         android:layout_margin="16dp"
-        android:src="@drawable/ic_videocam_white_48dp"
-        app:fabSize="mini" />
+        android:text="OFF"
+        android:textColor="@color/colorAccent"
+        android:textSize="24sp"
+        android:textStyle="bold" />
 
-    <android.support.design.widget.FloatingActionButton
-        android:id="@+id/fabGoToFrontCamera"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true"
-        android:layout_alignParentLeft="true"
+    <ProgressBar
+        android:id="@+id/gifIndicatorProgress"
+        android:layout_width="24dp"
+        android:layout_height="24dp"
         android:layout_margin="16dp"
-        android:src="@drawable/ic_camera_front_white_48dp"
-        app:fabSize="mini" />
-
-    <ImageView
-        android:layout_width="wrap_content"
-        android:src="@drawable/ic_flash_on_white_48dp"
-        android:layout_margin="16dp"
-        android:layout_alignParentRight="true"
-        android:id="@+id/camerFlashLight"
-        android:layout_height="wrap_content" />
-
-    <ImageView
-        android:layout_width="wrap_content"
-        android:src="@drawable/ic_settings_white_48dp"
-        android:layout_margin="16dp"
-        android:id="@+id/cameraSettings"
-        android:layout_height="wrap_content" />
-
-    <ImageView
-        android:layout_width="wrap_content"
-        android:src="@drawable/ic_arrow_forward_white_48dp"
-        android:layout_margin="16dp"
-        android:layout_alignParentRight="true"
-        android:layout_centerVertical="true"
-        android:id="@+id/goToList"
-        android:layout_height="wrap_content" />
+        android:layout_toLeftOf="@id/gifIndicator"
+        android:visibility="gone" />
 
 </RelativeLayout>

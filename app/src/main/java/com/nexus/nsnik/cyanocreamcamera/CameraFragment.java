@@ -2,72 +2,72 @@ package com.nexus.nsnik.cyanocreamcamera;
 
 import android.Manifest;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.hardware.Camera;
 import android.os.Bundle;
-import android.os.Environment;
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
+import android.preference.PreferenceManager;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.ActivityCompat;
+import android.support.v4.app.Fragment;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.content.Loader;
-import android.support.v7.app.AppCompatActivity;
-import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.Surface;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.ImageView;
+import android.widget.ProgressBar;
+import android.widget.TextView;
 import android.widget.Toast;
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
+
 import java.io.IOException;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-
-import static android.provider.MediaStore.Files.FileColumns.MEDIA_TYPE_IMAGE;
-import static android.provider.MediaStore.Files.FileColumns.MEDIA_TYPE_VIDEO;
 
 
-public class CamActivity extends AppCompatActivity implements View.OnClickListener, SurfaceHolder.Callback, LoaderManager.LoaderCallbacks,AsyncInterface{
+public class CameraFragment extends Fragment implements View.OnClickListener, SurfaceHolder.Callback, LoaderManager.LoaderCallbacks,AsyncInterface {
 
     Camera mCamera;
-    FloatingActionButton cam, goToVidCam, goToFrontCamera;
-    private static final int pRequestCode = 5002;
-    private static final String[] mPermissions = {Manifest.permission.CAMERA, Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.RECORD_AUDIO, Manifest.permission.WRITE_EXTERNAL_STORAGE};
+    FloatingActionButton cam, goToFrontCamera;
     SurfaceView surfaceView;
     private SurfaceHolder mHolder;
-    private static final String logTag = CamActivity.class.getSimpleName();
+    private static final String logTag = CameraFragment.class.getSimpleName();
     int id = 0;
     private static boolean mSwitch = false;
     public static ArrayList<Bitmap> temp = new ArrayList<>();
-    ImageView goToList, settings, flash;
+    ProgressBar indicatorProgress;
+    TextView indicator;
     private static final int mLoaderId = 1535;
+    SharedPreferences.OnSharedPreferenceChangeListener spfd = new SharedPreferences.OnSharedPreferenceChangeListener() {
+        @Override
+        public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
+            changeIndicator();
+        }
+    };
+    View tempView;
+
+
+    public CameraFragment() {
+    }
+
 
     @Override
-    protected void onCreate(@Nullable Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.cam_layout);
-        checkCameraHardware();
-        checkPermissions();
-        initilize(id);
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+        View v = LayoutInflater.from(getContext()).inflate(R.layout.cam_layout, container, false);
+        initilize(id, v);
         setParm();
         setClickListener();
+        tempView = v;
+        return v;
     }
 
     private void setClickListener() {
         cam.setOnClickListener(this);
-        goToVidCam.setOnClickListener(this);
         goToFrontCamera.setOnClickListener(this);
-        goToList.setOnClickListener(this);
-        settings.setOnClickListener(this);
     }
 
     private void setParm() {
@@ -77,21 +77,30 @@ public class CamActivity extends AppCompatActivity implements View.OnClickListen
         mCamera.setParameters(params);
     }
 
-    private void initilize(int id) {
+    private void initilize(int id, View v) {
+        cam = (FloatingActionButton) v.findViewById(R.id.fabCamera);
         mCamera = getCamera(id);
-        mCamera.setDisplayOrientation(setCameraDisplayOrientation(0));
-        surfaceView = (SurfaceView) findViewById(R.id.camera_preview);
+        mCamera.setDisplayOrientation(setCameraDisplayOrientation(id));
+        surfaceView = (SurfaceView)v.findViewById(R.id.camera_preview);
         mHolder = surfaceView.getHolder();
         mHolder.addCallback(this);
-        mHolder.setType(SurfaceHolder.SURFACE_TYPE_PUSH_BUFFERS);
-        cam = (FloatingActionButton) findViewById(R.id.fabCamera);
-        goToFrontCamera = (FloatingActionButton) findViewById(R.id.fabGoToFrontCamera);
-        goToVidCam = (FloatingActionButton) findViewById(R.id.fabGoToVidCamera);
-        goToList = (ImageView) findViewById(R.id.goToList);
-        settings = (ImageView) findViewById(R.id.cameraSettings);
-        flash = (ImageView) findViewById(R.id.camerFlashLight);
+        goToFrontCamera = (FloatingActionButton) v.findViewById(R.id.fabGoToFrontCamera);
+        indicator = (TextView) v.findViewById(R.id.gifIndicator);
+        indicatorProgress = (ProgressBar) v.findViewById(R.id.gifIndicatorProgress);
+        changeIndicator();
     }
 
+    private void changeIndicator() {
+        SharedPreferences spf = PreferenceManager.getDefaultSharedPreferences(getContext());
+        spf.registerOnSharedPreferenceChangeListener(spfd);
+        if (!spf.getBoolean(getString(R.string.savegifkey), false)) {
+            indicator.setText("OFF");
+            indicator.setTextColor(getResources().getColor(R.color.colorAccent));
+        } else {
+            indicator.setText("ON");
+            indicator.setTextColor(getResources().getColor(android.R.color.holo_green_light));
+        }
+    }
 
     private Camera getCamera(int id) {
         Camera c = null;
@@ -109,7 +118,7 @@ public class CamActivity extends AppCompatActivity implements View.OnClickListen
     public int setCameraDisplayOrientation(int cameraId) {
         android.hardware.Camera.CameraInfo info = new android.hardware.Camera.CameraInfo();
         android.hardware.Camera.getCameraInfo(cameraId, info);
-        int rotation = this.getWindowManager().getDefaultDisplay().getRotation();
+        int rotation = getActivity().getWindowManager().getDefaultDisplay().getRotation();
         int degrees = 0;
         switch (rotation) {
             case Surface.ROTATION_0:
@@ -136,12 +145,14 @@ public class CamActivity extends AppCompatActivity implements View.OnClickListen
     }
 
     @Override
-    protected void onResume() {
+    public void onResume() {
         if (mCamera == null) {
             mCamera = getCamera(id);
+            mCamera.setDisplayOrientation(setCameraDisplayOrientation(id));
         }
         super.onResume();
     }
+
 
     @Override
     public void surfaceCreated(SurfaceHolder holder) {
@@ -175,25 +186,8 @@ public class CamActivity extends AppCompatActivity implements View.OnClickListen
         releaseCamera();
     }
 
-    private boolean checkCameraHardware() {
-        if (getPackageManager().hasSystemFeature(PackageManager.FEATURE_CAMERA)) {
-            return true;
-        } else {
-            return false;
-        }
-    }
-
-    private void checkPermissions() {
-        if (ContextCompat.checkSelfPermission(this, mPermissions[0]) != PackageManager.PERMISSION_GRANTED
-                || ContextCompat.checkSelfPermission(this, mPermissions[1]) != PackageManager.PERMISSION_GRANTED
-                || ContextCompat.checkSelfPermission(this, mPermissions[2]) != PackageManager.PERMISSION_GRANTED
-                || ContextCompat.checkSelfPermission(this, mPermissions[3]) != PackageManager.PERMISSION_GRANTED) {
-            ActivityCompat.requestPermissions(this, mPermissions, pRequestCode);
-        }
-    }
-
     @Override
-    protected void onPause() {
+    public void onPause() {
         super.onPause();
         releaseCamera();
     }
@@ -215,26 +209,17 @@ public class CamActivity extends AppCompatActivity implements View.OnClickListen
                 save.asyncInterface = this;
                 save.execute(mCamera);
                 break;
-            case R.id.fabGoToVidCamera:
-                Toast.makeText(this, "Not Ready", Toast.LENGTH_SHORT).show();
-                break;
             case R.id.fabGoToFrontCamera:
                 frontCam();
-                break;
-            case R.id.goToList:
-                startActivity(new Intent(CamActivity.this, ListActivity.class));
-                break;
-            case R.id.cameraSettings:
-                startActivity(new Intent(CamActivity.this, Prefrences.class));
                 break;
         }
     }
 
-    private void frontCam(){
+    private void frontCam() {
         if (!mSwitch) {
             goToFrontCamera.setImageResource(R.drawable.ic_camera_rear_white_48dp);
             releaseCamera();
-            initilize(Camera.CameraInfo.CAMERA_FACING_FRONT);
+            initilize(Camera.CameraInfo.CAMERA_FACING_FRONT,tempView);
             try {
                 mCamera.setPreviewDisplay(mHolder);
                 mCamera.startPreview();
@@ -245,7 +230,7 @@ public class CamActivity extends AppCompatActivity implements View.OnClickListen
         } else {
             goToFrontCamera.setImageResource(R.drawable.ic_camera_front_white_48dp);
             releaseCamera();
-            initilize(id);
+            initilize(id,tempView);
             try {
                 mCamera.setPreviewDisplay(mHolder);
                 mCamera.startPreview();
@@ -258,19 +243,21 @@ public class CamActivity extends AppCompatActivity implements View.OnClickListen
 
     @Override
     public Loader onCreateLoader(int id, Bundle args) {
-        switch (id){
+        switch (id) {
             case mLoaderId:
-                return new GifLoade(this, temp);
+                return new GifLoade(getActivity(), temp);
         }
         return null;
     }
 
     @Override
     public void onLoadFinished(Loader loader, Object data) {
-        switch (loader.getId()){
+        switch (loader.getId()) {
             case mLoaderId:
                 temp.clear();
-                Toast.makeText(this,"Gif Saved",Toast.LENGTH_SHORT).show();
+                changeIndicator();
+                indicatorProgress.setVisibility(View.GONE);
+                Toast.makeText(getActivity(), "Gif Saved", Toast.LENGTH_SHORT).show();
                 break;
         }
     }
@@ -281,19 +268,28 @@ public class CamActivity extends AppCompatActivity implements View.OnClickListen
     }
 
     private void startLoader(int id) {
-        if (getSupportLoaderManager().getLoader(id) == null) {
-            getSupportLoaderManager().initLoader(id, null, this).forceLoad();
+        if (getActivity().getSupportLoaderManager().getLoader(id) == null) {
+            getActivity().getSupportLoaderManager().initLoader(id, null, this).forceLoad();
         } else {
-            getSupportLoaderManager().restartLoader(id, null, this).forceLoad();
+            getActivity().getSupportLoaderManager().restartLoader(id, null, this).forceLoad();
         }
     }
 
     @Override
     public void sendBitmap(Bitmap b) {
-        temp.add(b);
-        if(temp.size()==3){
-            startLoader(mLoaderId);
+        SharedPreferences spf = PreferenceManager.getDefaultSharedPreferences(getContext());
+        if (spf.getBoolean(getResources().getString(R.string.savegifkey), false)) {
+            temp.add(b);
+            indicator.setText(temp.size() + "");
+            if (temp.size() == 3) {
+                indicatorProgress.setVisibility(View.VISIBLE);
+                indicator.setTextColor(getResources().getColor(R.color.colorAccent));
+                indicator.setText("Saving");
+                startLoader(mLoaderId);
+            }
         }
     }
 }
+
+
 

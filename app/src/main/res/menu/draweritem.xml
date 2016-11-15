@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <item android:title="Camera"
+        android:icon="@drawable/ic_photo_camera_white_48dp"
+        android:checked="true"
+        android:id="@+id/menuCamera"/>
+
+    <item android:title="Video"
+        android:icon="@drawable/ic_videocam_white_48dp"
+        android:id="@+id/menuVideoCamera"/>
+
+    <item android:title="Gif List"
+        android:icon="@drawable/ic_arrow_forward_white_48dp"
+        android:id="@+id/menuList"/>
+
+    <item android:title="Settings"
+        android:icon="@drawable/ic_settings_white_48dp"
+        android:id="@+id/menuSettings"/>
+
+</menu>
