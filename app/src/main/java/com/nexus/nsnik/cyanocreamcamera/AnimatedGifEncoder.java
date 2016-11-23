@@ -15,7 +15,7 @@ import android.graphics.Canvas;
 import android.graphics.Paint;
 
 
-//library created by someone on internet not made by me since i dont know hwo to do....
+//library created by someone on internet not made by me since i dont know how to do....
 
 public class AnimatedGifEncoder {
 
