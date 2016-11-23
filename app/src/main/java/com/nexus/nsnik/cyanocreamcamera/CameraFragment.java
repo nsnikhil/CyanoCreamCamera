@@ -14,6 +14,7 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.content.Loader;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Surface;
 import android.view.SurfaceHolder;
@@ -189,7 +190,11 @@ public class CameraFragment extends Fragment implements View.OnClickListener, Su
     @Override
     public void onPause() {
         super.onPause();
-        releaseCamera();
+        if(mCamera!=null){
+            surfaceView.getHolder().removeCallback(this);
+            releaseCamera();
+        }
+
     }
 
     private void releaseCamera() {

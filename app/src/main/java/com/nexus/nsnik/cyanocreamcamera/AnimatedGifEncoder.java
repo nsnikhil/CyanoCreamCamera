@@ -14,9 +14,8 @@ import android.graphics.Bitmap.Config;
 import android.graphics.Canvas;
 import android.graphics.Paint;
 
-/**
- * Created by nsnik on 13-Nov-16.
- */
+
+//library created by someone on internet not made by me since i dont know hwo to do....
 
 public class AnimatedGifEncoder {
 

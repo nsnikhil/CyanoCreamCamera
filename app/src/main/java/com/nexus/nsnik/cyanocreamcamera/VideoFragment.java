@@ -36,6 +36,9 @@ public class VideoFragment extends Fragment implements SurfaceHolder.Callback,Vi
     MediaRecorder mMediaRecorder;
     private static final String logTag = VideoFragment.class.getSimpleName();
     private static boolean isRecording = false;
+    private static boolean mSwitch = false;
+    View tempView;
+    int id = 0;
 
     public VideoFragment() {
     }
@@ -57,6 +60,7 @@ public class VideoFragment extends Fragment implements SurfaceHolder.Callback,Vi
         record = (FloatingActionButton) v.findViewById(R.id.vCamStart);
         goToFrontCam = (FloatingActionButton) v.findViewById(R.id.vCamGoToFrontCamera);
         recordingIndicator = (TextView) v.findViewById(R.id.vCamIndicator);
+        tempView = v;
     }
 
     private boolean prepareVideoRecorder() {
@@ -113,7 +117,11 @@ public class VideoFragment extends Fragment implements SurfaceHolder.Callback,Vi
     private Camera getCamera() {
         Camera c = null;
         try {
-            c = Camera.open();
+            if (id == Camera.CameraInfo.CAMERA_FACING_FRONT) {
+                c = Camera.open(Camera.CameraInfo.CAMERA_FACING_FRONT);
+            } else {
+                c = Camera.open(Camera.CameraInfo.CAMERA_FACING_BACK);
+            }
         } catch (RuntimeException e) {
         }
         return c;
@@ -124,6 +132,7 @@ public class VideoFragment extends Fragment implements SurfaceHolder.Callback,Vi
             mCamera.stopPreview();
             mCamera.setPreviewCallback(null);
             mCamera.release();
+            mCamera.lock();
             mCamera = null;
         }
     }
@@ -133,7 +142,6 @@ public class VideoFragment extends Fragment implements SurfaceHolder.Callback,Vi
             mMediaRecorder.reset();
             mMediaRecorder.release();
             mMediaRecorder = null;
-            mCamera.lock();
         }
     }
 
@@ -169,7 +177,12 @@ public class VideoFragment extends Fragment implements SurfaceHolder.Callback,Vi
     @Override
     public void onPause() {
         super.onPause();
-        releaseCamera();
+        if(mCamera!=null){
+            mSurfaceView.getHolder().removeCallback(this);
+            releaseMediaRecorder();
+            releaseCamera();
+        }
+
     }
 
     @Override
@@ -234,8 +247,8 @@ public class VideoFragment extends Fragment implements SurfaceHolder.Callback,Vi
                 }
                 break;
             case R.id.vCamGoToFrontCamera:
-                Toast.makeText(getActivity(), "Will Switch To Front Camera", Toast.LENGTH_LONG).show();
                 break;
         }
     }
+
 }
